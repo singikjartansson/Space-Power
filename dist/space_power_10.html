@@ -17,7 +17,7 @@ html,body{
   align-items:center;justify-content:center;overflow:hidden;
   font-family:'Orbitron',monospace;color:var(--neon-cyan);
 }
-#wrap{position:relative;display:flex;flex-direction:column;align-items:center;transform-origin:center center;}
+#wrap{position:relative;display:flex;flex-direction:column;align-items:center;}
 
 /* HUD */
 #hud{
@@ -901,13 +901,12 @@ document.addEventListener('keyup',function(e){keys[e.key]=false;if(e.code==='Spa
 
 function fitToWindow(){
   var wrap=document.getElementById('wrap');
-  wrap.style.transform='';
-  var s=Math.min(window.innerWidth/wrap.offsetWidth, window.innerHeight/wrap.offsetHeight)*0.95;
-  if(s!==1) wrap.style.transform='scale('+s.toFixed(4)+')';
+  wrap.style.zoom=1;
+  var s=Math.min(window.innerWidth/wrap.offsetWidth, window.innerHeight/wrap.offsetHeight);
+  wrap.style.zoom=s;
 }
 window.addEventListener('resize',fitToWindow);
 window.addEventListener('load',fitToWindow);
-fitToWindow();
 
 applyLang();
 requestAnimationFrame(loop);
