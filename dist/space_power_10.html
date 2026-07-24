@@ -103,8 +103,8 @@ html,body{
 <div id="wrap">
   <div id="toolbar">
     <button class="tbtn" id="soundBtn">◎ SOUND: ON</button>
-    <button class="tbtn" id="fsBtn">⛶ FULLSCREEN</button>
     <button class="tbtn" id="langBtn">🌐 IS / EN</button>
+    <button class="tbtn" id="quitBtn">✕ QUIT</button>
   </div>
   <div id="hud">
     <div class="hud-item"><div class="hud-label">SCORE</div><div class="hud-val" id="scoreEl">0</div></div>
@@ -123,7 +123,7 @@ html,body{
     </div>
   </div>
   <div id="statusbar">
-    <span>◄ ► ROTATE</span><span>SPACE FIRE</span><span>ENTER START</span><span>F FULLSCREEN</span>
+    <span>◄ ► ROTATE</span><span>SPACE FIRE</span><span>ENTER START</span><span>ESC QUIT</span>
   </div>
   <div id="copyright">© 2026 Sigurður Ingi Kjartansson</div>
 </div>
@@ -201,13 +201,12 @@ var T = {
     wave:       'BYLGJA',
     sound_on:   '◎ HLJÓÐ: ON',
     sound_off:  '◎ HLJÓÐ: OFF',
-    fullscreen: '⛶ STÆKKA',
-    exit_fs:    '⛶ MINNKA',
+    quit_btn:   '✕ HÆTTA',
     lang_btn:   '🌐 IS / EN',
     rotate:     '◄ ► SNÚA',
     fire:       'BIL SKJÓTA',
     start_key:  'ENTER BYRJA',
-    fs_key:     'F STÆKKA',
+    quit_key:   'ESC HÆTTA',
     menu_sub:   'SNÚÐU SKOTTURNINN · SKJÓTTU ALLA ÓVINI',
     menu_hs:    'MET',
     menu_start: '— ÝTTU Á ENTER TIL AÐ BYRJA —',
@@ -233,13 +232,12 @@ var T = {
     wave:       'WAVE',
     sound_on:   '◎ SOUND: ON',
     sound_off:  '◎ SOUND: OFF',
-    fullscreen: '⛶ FULLSCREEN',
-    exit_fs:    '⛶ EXIT FS',
+    quit_btn:   '✕ QUIT',
     lang_btn:   '🌐 IS / EN',
     rotate:     '◄ ► ROTATE',
     fire:       'SPACE FIRE',
     start_key:  'ENTER START',
-    fs_key:     'F FULLSCREEN',
+    quit_key:   'ESC QUIT',
     menu_sub:   'ROTATE TURRET · SHOOT ALL INVADERS',
     menu_hs:    'BEST',
     menu_start: '— PRESS ENTER TO BEGIN —',
@@ -269,11 +267,11 @@ function applyLang() {
   for (var i=0; i<labels.length; i++) labels[i].textContent = t(keys[i]);
   // Toolbar buttons
   document.getElementById('soundBtn').textContent = soundOn ? t('sound_on') : t('sound_off');
-  document.getElementById('fsBtn').textContent = document.fullscreenElement ? t('exit_fs') : t('fullscreen');
   document.getElementById('langBtn').textContent = t('lang_btn');
+  document.getElementById('quitBtn').textContent = t('quit_btn');
   // Statusbar
   var spans = document.querySelectorAll('#statusbar span');
-  var sbKeys = ['rotate','fire','start_key','fs_key'];
+  var sbKeys = ['rotate','fire','start_key','quit_key'];
   for (var j=0; j<spans.length; j++) spans[j].textContent = t(sbKeys[j]);
   // Powerup defs labels
   PU_DEFS.life.label   = t('pu_life');
@@ -306,18 +304,19 @@ document.getElementById('soundBtn').onclick=function(){
   this.textContent=soundOn?t('sound_on'):t('sound_off');
   if(!soundOn)stopBGM();if(soundOn&&gameState==='playing')startBGM();
 };
-document.getElementById('fsBtn').onclick=toggleFS;
+document.getElementById('quitBtn').onclick=quitApp;
 document.getElementById('langBtn').onclick=function(){
   lang = lang==='is'?'en':'is';
   try{localStorage.setItem('spacepower_lang',lang);}catch(e){}
   applyLang();
 };
-function toggleFS(){if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(function(){});else document.exitFullscreen();}
-document.addEventListener('fullscreenchange',function(){
-  document.getElementById('fsBtn').textContent=document.fullscreenElement?t('exit_fs'):t('fullscreen');
-  if(document.fullscreenElement){var vw=window.innerWidth,vh=window.innerHeight,asp=W/H,ah=vh-110,cw,ch;if(ah*asp<=vw-20){ch=ah;cw=Math.floor(ch*asp);}else{cw=vw-20;ch=Math.floor(cw/asp);}canvas.style.width=cw+'px';canvas.style.height=ch+'px';}
-  else{canvas.style.width='';canvas.style.height='';}
-});
+function quitApp(){
+  try{
+    var tw=window.__TAURI__&&window.__TAURI__.window;
+    if(tw&&tw.getCurrentWindow){tw.getCurrentWindow().close();return;}
+  }catch(e){}
+  window.close();
+}
 
 // ── STATE ───────────────────────────────────────────────────────
 var gameState='menu';
@@ -895,7 +894,7 @@ document.addEventListener('keydown',function(e){
   if(e.code==='Space'){keys[' ']=true;e.preventDefault();}
   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].indexOf(e.key)>=0)e.preventDefault();
   if(e.key==='Enter'&&(gameState==='menu'||gameState==='gameover')){stopBGM();startGame();}
-  if(e.key==='f'||e.key==='F')toggleFS();
+  if(e.key==='Escape')quitApp();
 });
 document.addEventListener('keyup',function(e){keys[e.key]=false;if(e.code==='Space')keys[' ']=false;});
 
